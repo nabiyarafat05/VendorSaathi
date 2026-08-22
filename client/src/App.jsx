@@ -31,6 +31,8 @@ const salesHistory = [
   ['Masala Chai', '31 cups', '₹620', '12 May, 5:50 PM'],
 ]
 
+const baseSalesData = [740, 1285, 1028, 1971, 1500, 2600, 2129]
+
 function Icon({ name, size = 18 }) {
   const paths = {
     dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
@@ -68,7 +70,18 @@ function StatCard({ stat }) {
   )
 }
 
-function SalesChart() {
+function SalesChart({ salesData = baseSalesData }) {
+  const points = salesData.map((value, index) => ({
+    x: (index / (salesData.length - 1)) * 700,
+    y: 210 - (Math.min(value, 3000) / 3000) * 182,
+  }))
+  const linePath = points.reduce((path, point, index) => {
+    if (index === 0) return `M${point.x} ${point.y}`
+    const previous = points[index - 1]
+    const midpoint = (previous.x + point.x) / 2
+    return `${path} C${midpoint} ${previous.y} ${midpoint} ${point.y} ${point.x} ${point.y}`
+  }, '')
+
   return (
     <div className="chart-wrap">
       <div className="chart-axis"><span>₹3k</span><span>₹2k</span><span>₹1k</span><span>₹0</span></div>
@@ -81,8 +94,8 @@ function SalesChart() {
               <stop offset="1" stopColor="#176957" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <path d="M0 158 L116 120 L233 138 L350 72 L466 105 L583 28 L700 61 V210 H0Z" fill="url(#salesFill)" />
-          <path d="M0 158 L116 120 L233 138 L350 72 L466 105 L583 28 L700 61" fill="none" stroke="#176957" strokeWidth="3" />
+          <path d={`${linePath} V210 H0Z`} fill="url(#salesFill)" />
+          <path d={linePath} fill="none" stroke="#176957" strokeWidth="3" />
         </svg>
         <div className="chart-days">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => <span key={day}>{day}</span>)}</div>
       </div>
@@ -105,7 +118,13 @@ function PageHeader({ children }) {
   )
 }
 
-function DashboardPage() {
+function DashboardPage({ todaySales, salesData, onRecordSale }) {
+  const [showHowItWorks, setShowHowItWorks] = useState(true)
+
+  const dashboardStats = stats.map((stat) => (
+    stat.label === "Today's Sales" ? { ...stat, value: `₹${todaySales.toLocaleString('en-IN')}` } : stat
+  ))
+
   return (
     <div className="page-content">
       <section className="welcome">
@@ -115,10 +134,25 @@ function DashboardPage() {
           <p className="hindi-greeting">नमस्ते रवि</p>
           <p>Here’s what’s happening with your stall today.</p>
         </div>
-        <button className="outline-button"><Icon name="plus" size={17} /> Record a sale</button>
+        <button className="outline-button" type="button" onClick={onRecordSale}><Icon name="plus" size={17} /> Record a sale</button>
       </section>
 
-      <section className="stat-grid">{stats.map((stat) => <StatCard key={stat.label} stat={stat} />)}</section>
+      {showHowItWorks && (
+        <section className="how-it-works" aria-label="How VendorSaathi works">
+          <div className="how-it-works-heading">
+            <p className="eyebrow">A QUICK START</p>
+            <h2>How VendorSaathi works</h2>
+          </div>
+          <div className="how-it-works-steps">
+            <span><b>01</b> We look at your sales history and inventory</span>
+            <span><b>02</b> We check tomorrow&apos;s weather</span>
+            <span><b>03</b> We tell you exactly how much to prepare</span>
+          </div>
+          <button className="how-it-works-dismiss" type="button" aria-label="Dismiss How VendorSaathi works" onClick={() => setShowHowItWorks(false)}>×</button>
+        </section>
+      )}
+
+      <section className="stat-grid">{dashboardStats.map((stat) => <StatCard key={stat.label} stat={stat} />)}</section>
 
       <section className="content-grid">
         <article className="panel chart-panel">
@@ -127,7 +161,7 @@ function DashboardPage() {
             <button className="select-button">This week <span>⌄</span></button>
           </div>
           <div className="chart-summary"><strong>₹14,850</strong><span><b>↑ 8.4%</b> vs last week</span></div>
-          <SalesChart />
+          <SalesChart salesData={salesData} />
         </article>
 
         <article className="panel weather-panel">
@@ -153,22 +187,40 @@ function DashboardPage() {
         <article className="panel quick-actions">
           <div className="panel-heading"><div><p className="eyebrow">SHORTCUTS</p><h2>Quick actions</h2></div></div>
           <div className="action-list">
-            <button><span className="action-icon sales"><Icon name="plus" /></span><span>Record a sale</span><Icon name="arrow" size={15} /></button>
+            <button type="button" onClick={onRecordSale}><span className="action-icon sales"><Icon name="plus" /></span><span>Record a sale</span><Icon name="arrow" size={15} /></button>
             <button><span className="action-icon stock"><Icon name="box" /></span><span>Update inventory</span><Icon name="arrow" size={15} /></button>
             <button><span className="action-icon report"><Icon name="chart" /></span><span>View full report</span><Icon name="arrow" size={15} /></button>
           </div>
         </article>
       </section>
 
-      <footer>© 2024 VendorSaathi <span>Built for vendors, with care.</span></footer>
+      <footer>© 2024 VendorSaathi <span>Built for vendors, with care.</span><span>Built for low-data usage — works well even on basic smartphones</span></footer>
     </div>
   )
 }
 
-function SalesDemandPage() {
+function SalesDemandPage({ salesData, onSaleRecorded }) {
   const [product, setProduct] = useState('Samosa')
   const [quantity, setQuantity] = useState('')
   const [price, setPrice] = useState('')
+  const [formMessage, setFormMessage] = useState(null)
+
+  const saveSale = (event) => {
+    event.preventDefault()
+    const quantityValue = Number(quantity)
+    const priceValue = Number(price)
+    const revenue = quantityValue * priceValue
+
+    if (quantityValue <= 0 || priceValue <= 0) {
+      setFormMessage({ type: 'error', text: 'Enter a quantity and selling price greater than zero.' })
+      return
+    }
+
+    onSaleRecorded({ product, quantity: quantityValue, price: priceValue, revenue })
+    setQuantity('')
+    setPrice('')
+    setFormMessage({ type: 'success', text: `Sale saved: ₹${revenue.toLocaleString('en-IN')}` })
+  }
 
   return (
     <div className="page-content sales-demand-page">
@@ -179,7 +231,7 @@ function SalesDemandPage() {
       <section className="content-grid">
         <article className="panel chart-panel">
           <div className="panel-heading"><div><p className="eyebrow">LAST 7 DAYS</p><h2>Weekly sales</h2></div></div>
-          <SalesChart />
+          <SalesChart salesData={salesData} />
         </article>
 
         <article className="panel predicted-card">
@@ -192,7 +244,7 @@ function SalesDemandPage() {
 
       <section className="panel sale-entry">
         <div className="panel-heading"><div><p className="eyebrow">QUICK ENTRY</p><h2>Add a sale</h2></div></div>
-        <form onSubmit={(event) => event.preventDefault()}>
+        <form onSubmit={saveSale}>
           <label>Product
             <select value={product} onChange={(event) => setProduct(event.target.value)}>
               <option>Samosa</option>
@@ -207,6 +259,7 @@ function SalesDemandPage() {
             <input type="number" min="1" value={price} onChange={(event) => setPrice(event.target.value)} />
           </label>
           <button className="primary-button" type="submit">Save sale <Icon name="arrow" size={15} /></button>
+          {formMessage && <p className={`sale-message ${formMessage.type}`} role="status">{formMessage.text}</p>}
         </form>
       </section>
     </div>
@@ -214,6 +267,8 @@ function SalesDemandPage() {
 }
 
 function App() {
+  const [todaySales, setTodaySales] = useState(2700)
+  const [salesData, setSalesData] = useState(baseSalesData)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -228,12 +283,15 @@ function App() {
               : 'Dashboard'
 
   const pageForPath =
-    path === '/sales-demand' ? <SalesDemandPage />
+    path === '/sales-demand' ? <SalesDemandPage salesData={salesData} onSaleRecorded={({ revenue }) => {
+      setTodaySales((current) => current + revenue)
+      setSalesData((current) => [...current.slice(0, -1), current[current.length - 1] + revenue])
+    }} />
       : path === '/inventory' ? <InventoryPage />
         : path === '/profit' ? <ProfitPage />
           : path === '/ai-assistant' ? <AIAssistantPage />
             : path === '/schemes-support' ? <SchemesSupportPage />
-              : <DashboardPage />
+              : <DashboardPage todaySales={todaySales} salesData={salesData} onRecordSale={() => navigate('/sales-demand')} />
 
   const navigateTo = (label) => {
     const routes = {
@@ -252,7 +310,14 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">V</div>
+          <div className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 7h3l2 8h8l2-6H7" />
+              <circle cx="10" cy="19" r="1.4" />
+              <circle cx="17" cy="19" r="1.4" />
+              <path d="M9 7h8l-1-3H10Z" />
+            </svg>
+          </div>
           <div><strong>Vendor<span>Saathi</span></strong><small>YOUR BUSINESS COMPANION</small></div>
         </div>
 
@@ -277,6 +342,7 @@ function App() {
             <div className="help-icon"><Icon name="support" size={16} /></div>
             <strong>Need a little help?</strong>
             <p>Our guides can help you grow.</p>
+            <a className="help-phone" href="tel:+919876543210">+91 98765 43210</a>
           </div>
 
           <div className="profile">
