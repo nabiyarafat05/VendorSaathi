@@ -1,0 +1,143 @@
+.schemes-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 900px;
+  margin-bottom: 24px;
+}
+
+.scheme-header-icon,
+.scheme-question-icon,
+.result-badge {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  color: #0e7a5f;
+  background: #e4f7ef;
+}
+
+.scheme-question-card,
+.scheme-result-card {
+  max-width: 900px;
+  padding: 32px;
+}
+
+.scheme-progress {
+  margin-bottom: 28px;
+}
+
+.scheme-progress span {
+  display: block;
+  margin-bottom: 10px;
+  color: #6a746f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #edf1ef;
+}
+
+.progress-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #0e7a5f;
+  transition: width 0.25s ease;
+}
+
+.scheme-question-card h2,
+.scheme-result-card h2 {
+  margin: 18px 0 10px;
+}
+
+.scheme-question-card > p,
+.scheme-result-card > p {
+  max-width: 650px;
+  color: #5e6863;
+  line-height: 1.6;
+}
+
+.scheme-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 180px));
+  gap: 12px;
+  margin: 28px 0;
+}
+
+.scheme-options button {
+  padding: 16px;
+  border: 1px solid #dce5e0;
+  border-radius: 12px;
+  color: #34413a;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scheme-options button.selected {
+  border-color: #0e7a5f;
+  color: #0e7a5f;
+  background: #e4f7ef;
+}
+
+.scheme-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.scheme-actions .primary-button {
+  margin-left: auto;
+}
+
+.documents-list {
+  margin: 24px 0;
+  padding: 20px;
+  border-radius: 14px;
+  background: #f7faf8;
+}
+
+.documents-list h3 {
+  margin-top: 0;
+}
+
+.documents-list p {
+  margin: 10px 0;
+  color: #7a5140;
+}
+
+.documents-list p.done {
+  color: #0e7a5f;
+}
+
+.scheme-disclaimer {
+  margin: 20px 0;
+  padding: 14px;
+  border-left: 4px solid #edb24b;
+  border-radius: 8px;
+  color: #665831;
+  background: #fff8df;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .schemes-page-header {
+    align-items: flex-start;
+  }
+
+  .scheme-question-card,
+  .scheme-result-card {
+    padding: 22px;
+  }
+
+  .scheme-options {
+    grid-template-columns: 1fr;
+  }
+}
