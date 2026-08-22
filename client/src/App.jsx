@@ -77,12 +77,12 @@ function SalesChart() {
         <svg className="sales-chart" viewBox="0 0 700 210" preserveAspectRatio="none">
           <defs>
             <linearGradient id="salesFill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#ee8a4d" stopOpacity=".28" />
-              <stop offset="1" stopColor="#ee8a4d" stopOpacity="0" />
+              <stop offset="0" stopColor="#176957" stopOpacity=".24" />
+              <stop offset="1" stopColor="#176957" stopOpacity="0" />
             </linearGradient>
           </defs>
           <path d="M0 158 L116 120 L233 138 L350 72 L466 105 L583 28 L700 61 V210 H0Z" fill="url(#salesFill)" />
-          <path d="M0 158 L116 120 L233 138 L350 72 L466 105 L583 28 L700 61" fill="none" stroke="#ed8147" strokeWidth="3" />
+          <path d="M0 158 L116 120 L233 138 L350 72 L466 105 L583 28 L700 61" fill="none" stroke="#176957" strokeWidth="3" />
         </svg>
         <div className="chart-days">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => <span key={day}>{day}</span>)}</div>
       </div>
@@ -112,6 +112,7 @@ function DashboardPage() {
         <div>
           <p className="date-label">TUESDAY, 14 MAY 2024</p>
           <h1>Good morning, Ravi <span>✦</span></h1>
+          <p className="hindi-greeting">नमस्ते रवि</p>
           <p>Here’s what’s happening with your stall today.</p>
         </div>
         <button className="outline-button"><Icon name="plus" size={17} /> Record a sale</button>
@@ -146,6 +147,7 @@ function DashboardPage() {
             <div><p className="eyebrow">SAATHI SUGGESTS</p><h2>A small change, a big impact</h2></div>
           </div>
           <p className="recommendation-copy">Rain is expected tomorrow. Consider preparing around <strong>150–160 samosas</strong> instead of your usual 190 to reduce the risk of unsold food.</p>
+          <p className="recommendation-impact">Potential waste avoided: ₹280</p>
         </article>
 
         <article className="panel quick-actions">
