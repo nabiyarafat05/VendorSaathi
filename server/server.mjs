@@ -184,6 +184,27 @@ Answer in 2 to 4 complete sentences. Never end with an incomplete sentence.${
         max_completion_tokens: 250,
       })
 
+    const firstChoice = completion?.choices?.[0]
+    const messageResult = firstChoice?.message
+
+    console.log('[chat] Groq response diagnostics:', {
+      completionReturned: Boolean(completion),
+      choicesLength: Array.isArray(completion?.choices)
+        ? completion.choices.length
+        : null,
+      firstChoice: firstChoice
+        ? {
+            finish_reason: firstChoice.finish_reason ?? null,
+            messageExists: Boolean(messageResult),
+            contentExists:
+              messageResult &&
+              Object.prototype.hasOwnProperty.call(messageResult, 'content'),
+            contentType: typeof messageResult?.content,
+          }
+        : null,
+      model: 'openai/gpt-oss-20b',
+    })
+
     const reply =
       completion.choices[0]?.message?.content ||
       'Sorry, I could not generate a response right now.'
