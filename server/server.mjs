@@ -181,7 +181,7 @@ Answer in 2 to 4 complete sentences. Never end with an incomplete sentence.${
         ],
 
         temperature: 0.5,
-        max_completion_tokens: 250,
+        max_completion_tokens: 512,
       })
 
     const firstChoice = completion?.choices?.[0]
@@ -206,8 +206,9 @@ Answer in 2 to 4 complete sentences. Never end with an incomplete sentence.${
     })
 
     const reply =
-      completion.choices[0]?.message?.content ||
-      'Sorry, I could not generate a response right now.'
+      typeof messageResult?.content === 'string' && messageResult.content.trim()
+        ? messageResult.content
+        : 'Sorry, I could not generate a response right now.'
 
     response.json({
       reply,
