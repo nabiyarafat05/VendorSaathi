@@ -78,11 +78,6 @@ git clone https://github.com/nabiyarafat05/VendorSaathi.git
 cd client && npm install
 cd ../server && npm install
 ```
-Create `server/.env`:
-```env
-GROQ_API_KEY=your_groq_api_key
-OPENWEATHER_API_KEY=your_openweather_api_key
-```
 Run:
 ```bash
 cd server && node server.mjs   # backend
