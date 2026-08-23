@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3001/api'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 
 // Central place for product metadata the frontend needs (unit price is
 // required by /api/checkin so revenue/waste-value can be computed).
