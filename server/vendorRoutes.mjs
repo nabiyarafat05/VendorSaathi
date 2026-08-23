@@ -51,6 +51,12 @@ function saveHistory() {
 
 let history = loadHistory();
 
+const backendBaseUrl =
+  process.env.OWN_BASE_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  `http://localhost:${process.env.PORT || 3001}`;
+
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function tomorrowWeekday() {
@@ -68,7 +74,8 @@ function tomorrowWeekday() {
  */
 async function getTomorrowWeatherForEngine() {
   try {
-    const response = await fetch('http://localhost:3001/api/weather');
+    const weatherUrl = new URL('/api/weather', backendBaseUrl);
+    const response = await fetch(weatherUrl);
     const data = await response.json();
     const main = (data.tomorrow?.weatherMain || 'Clear').toLowerCase();
 
