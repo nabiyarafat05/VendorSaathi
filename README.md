@@ -11,7 +11,7 @@
 ---
 
 ## 📖 Overview
-VendorSaathi helps street-food vendors — starting in Lucknow — make smarter decisions using sales, demand, inventory, profit, weather, AI assistance, and government-scheme guidance in one simple dashboard. **Vision:** expand across India to different types of street vendors.
+VendorSaathi helps street-food vendors starting in Lucknow  make smarter decisions using sales, demand, inventory, profit, weather, AI assistance, and government-scheme guidance in one simple dashboard. **Vision:** expand across India to different types of street vendors.
 
 ## 🎯 Problem
 Vendors rely on guesswork for sales/demand, inventory, pricing/profit, weather planning, and finding relevant government support — with no simple digital tool to help.
