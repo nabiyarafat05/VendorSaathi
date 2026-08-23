@@ -74,7 +74,7 @@ VendorSaathi/
 
 ## 🚀 Setup
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/nabiyarafat05/VendorSaathi.git
 cd client && npm install
 cd ../server && npm install
 ```
