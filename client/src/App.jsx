@@ -4,7 +4,7 @@ import InventoryPage from './InventoryPage.jsx'
 import ProfitPage from './ProfitPage.jsx'
 import AIAssistantPage from './AIAssistantPage.jsx'
 import SchemesSupportPage from './SchemesSupportPage.jsx'
-import { PRODUCTS, recordSale, fetchLedger, fetchRecommendation } from './api.js'
+import { PRODUCTS, recordSale, fetchLedger, fetchRecommendation, fetchWeather } from './api.js'
 import './App.css'
 import './DashboardDesign.css'
 
@@ -251,15 +251,11 @@ function DashboardPage({ onRecordSaleClick }) {
   const [weatherError, setWeatherError] = useState(false)
 
   useEffect(() => {
-    const fetchWeather = async () => {
+    const loadWeather = async () => {
       try {
         setWeatherLoading(true)
         setWeatherError(false)
-        const response = await fetch('http://localhost:3001/api/weather')
-        if (!response.ok) {
-          throw new Error('Failed to fetch weather')
-        }
-        const data = await response.json()
+        const data = await fetchWeather()
         setWeather(data)
       } catch (error) {
         console.error('Weather fetch error:', error)
@@ -268,7 +264,7 @@ function DashboardPage({ onRecordSaleClick }) {
         setWeatherLoading(false)
       }
     }
-    fetchWeather()
+    loadWeather()
   }, [])
 
   const currentTemperature = weather ? Math.round(weather.temperature) : '--'

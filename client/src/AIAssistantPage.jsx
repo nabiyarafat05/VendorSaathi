@@ -4,7 +4,9 @@ import './AIAssistantPage.css'
 
 // See api.js for the same VITE_API_BASE_URL pattern — set in the
 // client's Vercel project settings for production.
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  'http://localhost:3001/api'
 
 const quickQuestions = [
   'How many samosas should I prepare tomorrow?',
