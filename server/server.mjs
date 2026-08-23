@@ -45,18 +45,20 @@ const OWN_BASE_URL =
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
   `http://localhost:${port}`
 
-
 // =====================================================
 // MIDDLEWARE
 // =====================================================
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://vendorsaathi-ebon.vercel.app',
+  process.env.CLIENT_URL,
+].filter(Boolean)
+
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      process.env.CLIENT_URL,
-    ].filter(Boolean),
+    origin: allowedOrigins,
   })
 )
 

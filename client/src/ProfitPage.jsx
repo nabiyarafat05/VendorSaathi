@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { Icon } from './InventoryIcons.jsx'
 import './ProfitPage.css'
 
-const API_BASE = 'http://localhost:3001/api'
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  'http://localhost:3001/api'
 
 const money = (value) => `₹${Math.round(value).toLocaleString('en-IN')}`
 
