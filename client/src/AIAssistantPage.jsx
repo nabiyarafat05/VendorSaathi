@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { Icon } from './InventoryIcons.jsx'
 import './AIAssistantPage.css'
 
+// See api.js for the same VITE_API_BASE_URL pattern — set in the
+// client's Vercel project settings for production.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+
 const quickQuestions = [
   'How many samosas should I prepare tomorrow?',
   'What should I restock today?',
@@ -56,7 +60,7 @@ export default function AIAssistantPage() {
     setSending(true)
 
     try {
-      const response = await fetch('http://localhost:3001/api/chat', {
+      const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
