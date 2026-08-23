@@ -35,6 +35,16 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
+// Self-URL for internal self-requests (recommendation/inventory/profit
+// → chat context, see getBusinessContext below). Priority: manual
+// OWN_BASE_URL override > Render's auto-provided RENDER_EXTERNAL_URL >
+// Vercel's auto-provided VERCEL_URL > localhost for local dev.
+const OWN_BASE_URL =
+  process.env.OWN_BASE_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  `http://localhost:${port}`
+
 
 // =====================================================
 // MIDDLEWARE
@@ -61,6 +71,7 @@ app.use(express.json())
 // GET  /api/recommendation
 // POST /api/checkin
 // GET  /api/inventory
+// GET  /api/profit
 // etc.
 
 app.use('/api', vendorRouter)
@@ -81,6 +92,48 @@ app.get('/', (request, response) => {
 // AI CHAT API
 // =====================================================
 
+/**
+ * Step 6: pulls the same real numbers already powering Sales & Demand,
+ * Inventory, and Profit, and hands them to Groq as context — so the
+ * chat answers from actual data instead of general advice. Calls the
+ * app's own running endpoints (self-fetch via OWN_BASE_URL, same
+ * pattern vendorRoutes.mjs uses for weather) rather than duplicating
+ * the calculation logic here.
+ */
+async function getBusinessContext() {
+  try {
+    const [recRes, invRes, profitRes] = await Promise.all([
+      fetch(`${OWN_BASE_URL}/api/recommendation?items=samosa,tea&event=none`),
+      fetch(`${OWN_BASE_URL}/api/inventory`),
+      fetch(`${OWN_BASE_URL}/api/profit`),
+    ])
+
+    const [rec, inv, profit] = await Promise.all([
+      recRes.json(),
+      invRes.json(),
+      profitRes.json(),
+    ])
+
+    const samosaRec = rec.recommendations?.find((r) => r.item === 'samosa')
+    const teaRec = rec.recommendations?.find((r) => r.item === 'tea')
+
+    const lowStockItems = inv.items
+      ?.filter((i) => i.status !== 'good')
+      .map((i) => `${i.name} (${i.quantity} ${i.unit}, ${i.status})`)
+      .join(', ') || 'none'
+
+    return `Tomorrow's forecast: samosa prepare ${samosaRec?.prepare ?? 'unknown'} (${samosaRec?.changePercent ?? 0}% vs usual), tea prepare ${teaRec?.prepare ?? 'unknown'}.
+Weather factors: ${rec.reasonSummary?.join('; ') || 'not available'}.
+Inventory needing attention: ${lowStockItems}.
+This week: revenue ₹${profit.weeklyRevenue ?? '?'}, profit ₹${profit.weeklyProfit ?? '?'}.
+Cost per samosa: ₹${profit.costPerUnit?.samosa ?? '?'}, sells at ₹${profit.avgSellingPrice ?? '?'}.
+${rec.isDemoData || profit.insight?.isDemoData ? '(Note: some figures are demo/fallback data, not live.)' : ''}`
+  } catch (error) {
+    console.error('[chat] Could not load business context, answering without it:', error.message)
+    return null
+  }
+}
+
 app.post('/api/chat', async (request, response) => {
   try {
     const { message } = request.body
@@ -91,15 +144,9 @@ app.post('/api/chat', async (request, response) => {
       })
     }
 
-    const completion =
-      await groq.chat.completions.create({
-        model: 'openai/gpt-oss-20b',
+    const businessContext = await getBusinessContext()
 
-        messages: [
-          {
-            role: 'system',
-
-            content: `You are VendorSaathi, a friendly AI business assistant for Indian street-food vendors.
+    const systemPrompt = `You are VendorSaathi, a friendly AI business assistant for Indian street-food vendors.
 
 Give practical and short advice about sales, inventory, profit, food wastage, and customer demand.
 
@@ -107,11 +154,22 @@ Use simple English or Hinglish when the user writes in Hinglish.
 
 Do not use Markdown symbols such as **, #, bullet characters, tables, or numbered lists. Write plain, short sentences.
 
-Do not invent vendor sales data. If the vendor has not provided their sales or inventory data, clearly say that your recommendation is a general estimate.
-
 Never promise exact profit, loan approval, or guaranteed demand.
 
-Answer in 2 to 4 complete sentences. Never end with an incomplete sentence.`,
+Answer in 2 to 4 complete sentences. Never end with an incomplete sentence.${
+      businessContext
+        ? `\n\nHere is the vendor's real current business data. Use it directly when relevant instead of giving generic advice, and cite the actual numbers:\n${businessContext}`
+        : '\n\nReal business data is not available right now — clearly say your recommendation is a general estimate rather than inventing numbers.'
+    }`
+
+    const completion =
+      await groq.chat.completions.create({
+        model: 'openai/gpt-oss-20b',
+
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
           },
 
           {
